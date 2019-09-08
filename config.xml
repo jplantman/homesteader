@@ -13,7 +13,7 @@
     JP Field
   </author>
   
-  <icon src="icon.svg" />>
+  <icon src="icon.png" />>
 
   <platform name="android" />
 </widget>
