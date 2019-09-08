@@ -1,0 +1,19 @@
+<widget
+  id="com.jpfield.homesteader"
+  version="0.0.1"
+>
+  <name>
+    The Homesteader
+  </name>
+
+  <description>
+    A text-based strategy game where you build and manage a homestead in real time. Not Done Yet.
+  </description>
+  <author>
+    JP Field
+  </author>
+  
+  <icon src="icon.svg" />>
+
+  <platform name="android" />
+</widget>
