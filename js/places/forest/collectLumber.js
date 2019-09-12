@@ -36,6 +36,13 @@ function lumberToolsInfo(tool) {
       print("A steel axe is good for chopping wood, but very hard work.");
     }}
   }
+  else if (tool == 'Small Chainsaw') {
+    return {
+      time: 3 * 60 * 60 * 1000, timeLabel: "3 hours", func: () => {
+        print("A chainsaw really helps, even if it's a small one. Uses 1 ounce of gas.");
+      }
+    }
+  }
 }
 
 results.collectLumber = (obj) => {
@@ -53,10 +60,23 @@ results.collectLumber = (obj) => {
       tools.broken.push("Broken Axe");
     }
   }
-  // CHEAP CHAINSAW
-  // SMALL CHAINSAW
-  // LARGE CHAINSAW
 
-  goods.lumber += Math.floor(collected * skills.lumberjack / 100);
+  // SMALL CHSINSAW
+  if (obj.tool == "Small Chainsaw" && goods.gas >= 1) {
+    updateGas(-1);
+    collected = 15;
+    const chance = Math.random();
+    let dull = "";
+    if (chance >= 0.9) {
+      dull = "Your chainsaw is getting dull.";
+    }
+    else {
+      print("Your axe broke while woodcutting!", "red");
+      tools.lumber.splice(tools.lumber.indexOf('Axe'), 1);
+      tools.broken.push("Broken Axe");
+    }
+  }
+
+  updateWood( Math.floor(collected * skills.lumberjack / 100) );
   print("You collected " + collected + " lumber. Total: " + goods.lumber);
 }

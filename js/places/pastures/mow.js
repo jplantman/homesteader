@@ -66,7 +66,7 @@ results.finishMowing = (obj) => {
       tools.mowing[tools.mowing.indexOf('Scythe')] = "Dull Scythe";
       collected -= 2;
     }
-    goods.hay += Math.floor(collected);
+    updateHay( Math.floor(collected) );
     print("You collected " + collected + " hay. Total: " + goods.hay+". "+dull);
   }
   else if (obj.tool == "Dull Scythe") {
@@ -77,7 +77,7 @@ results.finishMowing = (obj) => {
       tools.mowing[tools.mowing.indexOf('Dull Scythe')] = "Very Dull Scythe";
       collected -= 2;
     }
-    goods.hay += Math.floor(collected);
+    updateHay( Math.floor(collected) );
     print("You collected " + collected + " hay. Total: " + goods.hay + ". "+dull);
   }
   else if (obj.tool == "Very Dull Scythe") {
@@ -91,7 +91,7 @@ results.finishMowing = (obj) => {
       tools.broken.push("Broken Scythe");
       collected -= 2;
     }
-    goods.hay += Math.floor(collected);
+    updateHay( Math.floor(collected) );
     print("You collected " + collected + " hay. Total: " + goods.hay + ". "+breaks);
   }
 

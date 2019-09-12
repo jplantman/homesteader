@@ -1,11 +1,12 @@
 /*
+--------------
   This game works off a timer based action system:
     1. an action is chosen by the player
     2. the time of completion is saved
     3. the action name and results (in array data format) are saved
     4. when the completion date is reached, the action results data is processed, and the player is free again
 
-
+--------------
     This file is organized as follows:
     BASIC GAME VARIABLES
       self explanatory
@@ -21,12 +22,57 @@
                       without this, an action may not be recorded
         load - occurs at initialization
         getDuration - returns html for how long something takes, in days hrs mins sec
-        updateTimeDisplay - maintains html for the time display in the top right corner, when an action is active
+        XXX-updateTimeDisplay - maintains html for the time display in the top right corner, when an action is active
         completeAction - checks for actions that complete, and carries out their results
+    STATUS BAR
     MAIN GAME MENU
     INITIALIZE GAME
 
-    each button in the main game menu 
+
+--------------
+    each button in the main game menu leads to an area of activity. these are:
+     - The Farm
+          > view your stats, use farm buildings like workshop
+     - Forest
+          > cut wood, forage, run pigs/goats?
+     - Garden
+          > grow herbacious plants
+          > run animals
+     - Orchard  
+          > grow trees, run animals
+     - Pastures
+          > mow, run animals, dig a pond?
+     - Town
+          > visit stores, the hatchery, the library, etc
+
+--------------
+    The layout is like this:
+      status-bar
+      text | img
+      buttons
+
+      *the status bar shows money, action timer, current time, etc.
+      *the img is a photo of the scene or action. eventually, 
+       i should use all photos from my farm
+
+--------------
+    photos needed:
+    farm front
+    toolshed
+    lumber/hay pile
+    pantry
+    workshop
+    skilled farmer farming
+    garden
+    forest
+    orchard
+    pasture
+    community center
+    library
+    farm supply
+    hatchery
+    farm auction
+
 */
 
 
@@ -35,7 +81,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 const data = {};//this.load() || {}; // comment out load to always start new game
 const isNewGame = data.app ? 'no' : 'yes'; 
 const results = {}; // holds result-of-action functions
-const timeDisplay = document.getElementById('timeDisplay');
+let currentDate = new Date();
 
 // PLAYER DATA VARIABLES //
 let app = data.app || {
@@ -45,7 +91,7 @@ let app = data.app || {
   completeTime: undefined,
   completeFunction: undefined,
   completeParams: undefined,
-  speed: 0.0001 // speeds up all actions, == 1 for normal gameplay
+  speed: 1 // speeds up all actions, == 1 for normal gameplay
 }
 
 let farm = data.farm || {
@@ -53,17 +99,18 @@ let farm = data.farm || {
 }
 
 let goods = data.goods || {
-  cash: 100,
+  money: 10000,
   lumber: 0,
-  hay: 0
+  hay: 0,
+  gas: 10
 }
 
 let tools = data.tools || {
-  lumber: ["Axe"],
+  lumber: [],
   tillage: ["Hoe"],
   mowing: ["Very Dull Scythe"],
   harvesting: ["Basket"],
-  broken: []
+  broken: ["Broken Axe"]
 }
 
 let skills = data.skills || {
@@ -81,9 +128,13 @@ let skills = data.skills || {
 }
 
 // BASIC GAME FUNCTIONS //
+function getMins(min){
+  return (min+"").length == 2 ? min : '0'+min;
+}
+
 function getDate(dateInMS){
-  const date = dateInMS ? new Date(dateInMS) : new Date();
-  return date.getHours() + ":" + date.getMinutes() + ", " + date.getDate() + " " + months[date.getMonth()] + ", " + date.getFullYear();
+  const date = dateInMS ? new Date(dateInMS) : currentDate;
+  return date.getHours() + ":" + getMins(date.getMinutes()) + ", " + date.getDate() + " " + months[date.getMonth()] + ", " + date.getFullYear();
 }
 
 function save(){
@@ -120,17 +171,6 @@ function getDuration(ms){
   return html;
 }
 
-function updateTimeDisplay(){
-  if (!app.currentAction) {
-    timeDisplay.innerHTML = "";
-    return;
-  }
-  const doneIn = app.completeTime - Date.now();
-  const html = getDuration(doneIn);
-
-  timeDisplay.innerHTML = "<span style='color: steelblue;'>"+app.currentAction + "</span> - " + html;
-}
-
 function completeAction(){
   if (app.currentAction && app.completeTime <= Date.now()) {    
     results[app.completeFunction](app.completeParams);
@@ -140,6 +180,45 @@ function completeAction(){
   }
   save();
 }
+
+// STATUS BAR //
+
+const moneyStatus = document.getElementById('money');
+const woodStatus = document.getElementById('wood');
+const hayStatus = document.getElementById('hay');
+const gasStatus = document.getElementById('gas');
+const clockStatus = document.getElementById('clock');
+const actionStatus = document.getElementById('action');
+
+function updateMoney(n){
+  goods.money += n || 0;
+  moneyStatus.innerHTML = goods.money + " <img src='images/coins.png' class='icon' />";
+}
+function updateWood(n) {
+  goods.lumber += n || 0;
+  woodStatus.innerHTML = goods.lumber + " <img src='images/logs.png' class='icon' />";
+ }
+function updateHay(n) {
+  goods.hay += n || 0;
+  hayStatus.innerHTML = goods.hay + " <img src='images/hay.png' class='icon' />";
+}
+function updateGas(n) {
+  goods.gas += n || 0;
+  gasStatus.innerHTML = goods.gas + " <img src='images/gas.png' class='icon' />";
+}
+// function updateClock() {
+//   clockStatus.innerHTML = getDate();
+// }
+function updateAction() {
+  if (!app.currentAction) {
+    actionStatus.innerHTML = "";
+    return;
+  }
+  const doneIn = app.completeTime - Date.now();
+  const html = getDuration(doneIn);
+
+  actionStatus.innerHTML = app.currentAction + " - " + html;
+ }
 
 // MAIN GAME MENU //
 function mainMenu(isNewGame){
@@ -153,9 +232,9 @@ function mainMenu(isNewGame){
   save();
   completeAction()
   if (!app.currentAction) {
-    print("You are currently not working. It is now " + getDate())
+    print("What should we do now, farmer "+app.name+"?")
   } else {
-    print("You are currently " + app.currentAction + ". It is now " + getDate())
+    print("You are currently " + app.currentAction + ", farmer "+app.name+".")
   }
   showButtons([
     [app.farmName, () => { myFarm() }],
@@ -163,14 +242,21 @@ function mainMenu(isNewGame){
     ["Garden"],
     ["Orchard"],
     ["Pastures", ()=>{ pastures() }],
-    ["Town"]
+    ["Town", ()=>{ town() }]
   ]);
 }
 
 // INITIALIZE GAME //
 mainMenu(isNewGame);
-updateTimeDisplay();
+updateAction();
+// updateClock();
+updateHay();
+updateGas();
+updateWood();
+updateMoney();
 setInterval(function () {
+  currentDate = new Date();
   completeAction()
-  updateTimeDisplay()
+  updateAction()
+  // updateClock();
 }, 1000);
